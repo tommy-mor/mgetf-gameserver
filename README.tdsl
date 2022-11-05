@@ -1,0 +1,3 @@
+this repo will merge into empty tf2 directory
+
+have the egg json in this repo as well, egg script just clones and merges, then runs install.sh in here
