@@ -47,6 +47,7 @@ else
 	ok "downloading mge map";
 	cd /home/container/tf/maps/;
 	curl -L -O "https://github.com/Spaceship-Servers/gameserver-repository/blob/master/tf/maps/mge_chillypunch_final4_fix2.bsp?raw=true";
+	mv "mge_chillypunch_final4_fix2.bsp?raw=true" "mge_chillypunch_final4_fix2.bsp";
 fi
 
 
