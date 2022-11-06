@@ -24,22 +24,23 @@ export HOME=/mnt/server
 mkdir -p /mnt/server/.steam/sdk32
 cp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so
 
-# i'll install mm/sm here eventually
-# public repository stuff starts here
 mkdir -p /mnt/server/.addons
 cd /mnt/server/.addons
-# clone (THIS ALLOWS ANYONE TO CLONE THE REPO, DO NOT SHARE THIS)
 
 git lfs install
 git clone https://github.com/tommy-mor/mgetf-gameserver.git .
+
 sync
 # git config pull.rebase false
 # git fetch --all
 # git checkout ${SERVER_BRANCH}
 # git pull origin ${SERVER_BRANCH}
 # k now copy and delete the folders
+
 cp -rl /mnt/server/.addons/* /mnt/server &>/dev/null
 rm -rf /mnt/server/.addons
+
+
 cd /mnt/server
 chmod 744 /mnt/server/start.sh
 sync
