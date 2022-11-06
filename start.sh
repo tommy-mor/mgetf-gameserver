@@ -32,9 +32,15 @@ sync
 
 # TODO build sourcemod plugins and stuff...
 
-ok "installing metamod/sourcemod"
+if [ -d /home/container/tf/addons/sourcemod ]; then
 
-source scripts/getmmsm.sh
+	ok "sm already installed"
+else
+
+	ok "installing sm";
+	source scripts/getmmsm.sh
+fi
+
 
 cd /home/container
 
