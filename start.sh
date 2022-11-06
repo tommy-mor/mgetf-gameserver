@@ -41,6 +41,14 @@ else
 	source scripts/getmmsm.sh
 fi
 
+if [ -f /home/container/tf/maps/mge_chillypunch_final4_fix2.bsp ]; then
+	ok "mge map already downloaded"
+else
+	ok "downloading mge map";
+	cd /home/container/tf/maps/;
+	curl -L -O "https://github.com/Spaceship-Servers/gameserver-repository/blob/master/tf/maps/mge_chillypunch_final4_fix2.bsp?raw=true";
+fi
+
 
 cd /home/container
 
