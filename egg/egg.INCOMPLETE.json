@@ -16,7 +16,7 @@
 		"creatorstf\/pterodactyl-srcds-debian-buster"
     ],
     "file_denylist": [],
-    "startup": ".\/start.sh -game tf -console -port {{SERVER_PORT}} +map {{SRCDS_MAP}} +ip 0.0.0.0 -strictportbind -norestart +sv_setsteamaccount {{STEAM_ACC}}",
+	"startup": "curl -L -O https://raw.githubusercontent.com/tommy-mor/mgetf-gameserver/main/start.sh && chmod +x ./start.sh && ./start.sh -game tf -console -port {{SERVER_PORT}} +map {{SRCDS_MAP}} +ip 0.0.0.0 -strictportbind -norestart +sv_setsteamaccount {{STEAM_ACC}}",
     "config": {
         "files": "{}",
         "startup": "{\r\n    \"done\": \"gameserver Steam ID\"\r\n}",

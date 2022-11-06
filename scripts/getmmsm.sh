@@ -1,5 +1,7 @@
 #!/bin/bash
 
+echo "running from git"
+
 mm_url="https://mms.alliedmods.net/mmsdrop/1.12/mmsource-1.12.0-git1160-linux.tar.gz"
 sm_url="https://www.sourcemod.net/smdrop/1.12/sourcemod-1.12.0-git6906-linux.tar.gz"
 
@@ -10,11 +12,13 @@ export destfolder="mmsm_xtracted"
 
 
 echo "rming tempfolder"
-rm -rfv /tmp/${destfolder}
+
+mkdir -p /home/container/.addons
+rm -rf /home/container/.addons/${destfolder}
 echo "mkdiring new destfolder"
-mkdir /tmp/${destfolder}
+mkdir /home/container/.addons/${destfolder}
 echo "cding to destfolder"
-cd /tmp/$destfolder
+cd /home/container/.addons/$destfolder
 
 echo "Curling Metamod Source"
 curl "$mm_url" --output "$mm_dest" --limit-rate 4M
@@ -24,33 +28,46 @@ echo "Curling SourceMod"
 curl "$sm_url" --output "$sm_dest" --limit-rate 4M
 
 echo "Untarring Metamod Source"
-tar xfv "$mm_dest" # -C "$destfolder"
+tar xf "$mm_dest" # -C "$destfolder"
 echo "Untarring Metamod Source"
-tar xfv "$sm_dest" # -C "$destfolder"
+tar xf "$sm_dest" # -C "$destfolder"
 
 echo "rming tgz"
-rm ./*.tgz -fv
+rm ./*.tgz -f
 
 
 echo "rming junk"
-rm ./cfg                                    -rfv
-rm ./addons/sourcemod/plugins               -rfv
-rm ./addons/sourcemod/scripting             -rfv
-rm ./addons/sourcemod/configs               -rfv
+#rm ./cfg                                    -rfv
+# rm ./addons/sourcemod/plugins               -rfv
+# rm ./addons/sourcemod/scripting             -rfv
+# rm ./addons/sourcemod/configs               -rfv
 # this gets linux64 folder too lmao
-find . -name "*x64*"            -exec rm {} -rfv    \;
-find . -name "*blade.so"        -exec rm {} -fv     \;
-find . -name "*bms.so"          -exec rm {} -fv     \;
-find . -name "*css.so"          -exec rm {} -fv     \;
-find . -name "*csgo.so"         -exec rm {} -fv     \;
-find . -name "*dods.so"         -exec rm {} -fv     \;
-find . -name "*doi.so"          -exec rm {} -fv     \;
-find . -name "*ep1.so"          -exec rm {} -fv     \;
-find . -name "*ep2.so"          -exec rm {} -fv     \;
-find . -name "*hl2dm.so"        -exec rm {} -fv     \;
-find . -name "*insurgency.so"   -exec rm {} -fv     \;
-find . -name "*l4d*.so"         -exec rm {} -fv     \;
-find . -name "*nd.so"           -exec rm {} -fv     \;
-find . -name "*sdk2013.so"      -exec rm {} -fv     \;
+#find . -name "*x64*"            -exec rm {} -rf    \;
+#find . -name "*blade.so"        -exec rm {} -f     \;
+#find . -name "*bms.so"          -exec rm {} -f     \;
+#find . -name "*css.so"          -exec rm {} -f     \;
+#find . -name "*csgo.so"         -exec rm {} -f     \;
+#find . -name "*dods.so"         -exec rm {} -f     \;
+#find . -name "*doi.so"          -exec rm {} -f     \;
+#find . -name "*ep1.so"          -exec rm {} -f     \;
+#find . -name "*ep2.so"          -exec rm {} -f     \;
+#find . -name "*hl2dm.so"        -exec rm {} -f     \;
+#find . -name "*insurgency.so"   -exec rm {} -f     \;
+#find . -name "*l4d*.so"         -exec rm {} -f     \;
+#find . -name "*nd.so"           -exec rm {} -f     \;
+#find . -name "*sdk2013.so"      -exec rm {} -f     \;
+
+echo "moving sm/mm into tf/directory"
+
+cd ..
+
+ls -al 
+
+cp -rf "$destfolder/addons" /home/container/tf/addons
+cp -rf "$destfolder/cfg/sourcemod" /home/container/tf/cfg/sourcemod
+
+cd ..
+
+#rm -rf .addons/
 
 echo "DONE"

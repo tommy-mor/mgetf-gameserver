@@ -1,8 +1,11 @@
 #!/bin/bash
 # colors
 
-
-source scripts/helpers.sh
+GREEN=$(tput setaf 2)
+ok()
+{
+    echo "${GREEN}[OK] ${1} ${RESET}"
+}
 
 ok "running custom startup script"
 
@@ -20,8 +23,8 @@ cd /home/container/.addons
 curl -L -O https://github.com/tommy-mor/mgetf-gameserver/archive/refs/heads/main.tar.gz
 tar -xvf main.tar.gz 
 
-cp -rl /home/container/.addons/mgetf-gameserver/* /home/container &>/dev/null
-rm -rf /home/container/.addons
+cp -rfl /home/container/.addons/mgetf-gameserver-main/* /home/container/
+# rm -rf /home/container/.addons
 
 cd /home/container
 
@@ -32,6 +35,8 @@ sync
 ok "installing metamod/sourcemod"
 
 source scripts/getmmsm.sh
+
+cd /home/container
 
 ok "updating tf2"
 
