@@ -24,11 +24,6 @@ export HOME=/mnt/server
 mkdir -p /mnt/server/.steam/sdk32
 cp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so
 
-mkdir -p /mnt/server/.addons
-cd /mnt/server/.addons
-
-git lfs install
-git clone https://github.com/tommy-mor/mgetf-gameserver.git .
 
 sync
 # git config pull.rebase false

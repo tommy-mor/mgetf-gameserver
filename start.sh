@@ -7,10 +7,23 @@ source scripts/helpers.sh
 ok "running custom startup script"
 
 ok "pulling new server from git"
+
+ls -al .
 # pull from git repo (which was cloned in install)
-# 
-git fetch -all
-git reset --hard origin/master
+
+
+ok "downloading my server config from git"
+
+mkdir -p /home/container/.addons
+
+cd /home/container/.addons
+curl -L -O https://github.com/tommy-mor/mgetf-gameserver/archive/refs/heads/main.tar.gz
+tar -xvf main.tar.gz 
+
+cp -rl /home/container/.addons/mgetf-gameserver/* /home/container &>/dev/null
+rm -rf /home/container/.addons
+
+cd /home/container
 
 sync
 
