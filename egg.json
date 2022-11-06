@@ -6,14 +6,14 @@
     },
     "exported_at": "2022-01-30T14:09:22-05:00",
     "name": "TF2: MGE.TF",
-    "author": "support@pterodactyl.io",
-    "description": "Team Fortress 2 is a team-based first-person shooter multiplayer video game developed and published by Valve Corporation. It is the sequel to the 1996 mod Team Fortress for Quake and its 1999 remake.",
+    "author": "thmorriss@gmail.com",
+    "description": "mge is an epic 1v1 mod",
     "features": [
         "gsl_token",
         "steam_disk_space"
     ],
     "images": [
-        "ghcr.io\/pterodactyl\/games:source"
+		"creatorstf\/pterodactyl-srcds-debian-buster"
     ],
     "file_denylist": [],
     "startup": ".\/srcds_run -game tf -console -port {{SERVER_PORT}} +map {{SRCDS_MAP}} +ip 0.0.0.0 -strictportbind -norestart +sv_setsteamaccount {{STEAM_ACC}}",
@@ -25,7 +25,7 @@
     },
     "scripts": {
         "installation": {
-            "script": "git clone git@github.com:tommy-mor/mgetf-gameserver.git && ls #TODO make this use the https://stackoverflow.com/questions/9864728/how-to-get-git-to-clone-into-current-directory",
+            "script": true,
             "container": "ghcr.io\/pterodactyl\/installers:debian",
             "entrypoint": "bash"
         }

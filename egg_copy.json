@@ -1,0 +1,62 @@
+{
+  "_comment": "epic comment",
+  "meta": {
+    "version": "PTDL_v1",
+    "update_url": null
+  },
+  "exported_at": "2022-01-30T14:09:22-05:00",
+  "name": "TF2: MGE.TF",
+  "author": "thmorriss@gmail.com",
+  "description": "mge is an epic 1v1 mod",
+  "features": [
+    "gsl_token",
+    "steam_disk_space"
+  ],
+  "images": [
+    "creatorstf/pterodactyl-srcds-debian-buster"
+  ],
+  "file_denylist": [],
+  "startup": "./srcds_run -game tf -console -port {{SERVER_PORT}} +map {{SRCDS_MAP}} +ip 0.0.0.0 -strictportbind -norestart +sv_setsteamaccount {{STEAM_ACC}}",
+  "config": {
+    "files": "{}",
+    "startup": "{\r\n    \"done\": \"gameserver Steam ID\"\r\n}",
+    "logs": "{}",
+    "stop": "quit"
+  },
+  "scripts": {
+    "installation": {
+      "script": "#!/bin/bash\n# SRCDS Base Installation Script\n#\n# Server Files: /mnt/server\ndpkg --add-architecture i386\napt -y update\napt -y --no-install-recommends install curl ca-certificates git gnutls-bin libsdl2-2.0-0:i386 git-lfs\nshopt -s dotglob nullglob\n\n\ncd /tmp\ncurl -sSL -o steamcmd.tar.gz http://media.steampowered.com/installer/steamcmd_linux.tar.gz\nmkdir -p /mnt/server/steamcmd\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\ncd /mnt/server/steamcmd\n\n#\n# SteamCMD fails otherwise for some reason, even running as root.\n# This is changed at the end of the install process anyways.\n#\nchown -R root:root /mnt\nexport HOME=/mnt/server\n./steamcmd.sh +login anonymous +force_install_dir /mnt/server +app_update 232250 +quit\nmkdir -p /mnt/server/.steam/sdk32\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\n\n# i'll install mm/sm here eventually\n# public repository stuff starts here\nmkdir -p /mnt/server/.addons\ncd /mnt/server/.addons\n# clone (THIS ALLOWS ANYONE TO CLONE THE REPO, DO NOT SHARE THIS)\n\ngit lfs install\ngit clone https://github.com/tommy-mor/mgetf-gameserver.git .\nsync\n# git config pull.rebase false\n# git fetch --all\n# git checkout ${SERVER_BRANCH}\n# git pull origin ${SERVER_BRANCH}\n# k now copy and delete the folders\ncp -rl /mnt/server/.addons/* /mnt/server &>/dev/null\nrm -rf /mnt/server/.addons\ncd /mnt/server\nchmod 744 /mnt/server/start.sh\nsync\n",
+      "container": "ghcr.io/pterodactyl/installers:debian",
+      "entrypoint": "bash"
+    }
+  },
+  "variables": [
+    {
+      "name": "Game ID",
+      "description": "The ID corresponding to the game to download and run using SRCDS.",
+      "env_variable": "SRCDS_APPID",
+      "default_value": "232250",
+      "user_viewable": true,
+      "user_editable": false,
+      "rules": "required|regex:/^(232250)$/"
+    },
+    {
+      "name": "Default Map",
+      "description": "The default map to use when starting the server.",
+      "env_variable": "SRCDS_MAP",
+      "default_value": "cp_dustbowl",
+      "user_viewable": true,
+      "user_editable": true,
+      "rules": "required|regex:/^(\\w{1,20})$/"
+    },
+    {
+      "name": "Steam",
+      "description": "The Steam Game Server Login Token to display servers publicly. Generate one at https://steamcommunity.com/dev/managegameservers",
+      "env_variable": "STEAM_ACC",
+      "default_value": "",
+      "user_viewable": true,
+      "user_editable": true,
+      "rules": "required|string|alpha_num|size:32"
+    }
+  ]
+}
