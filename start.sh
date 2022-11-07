@@ -49,9 +49,13 @@ else
 	mv "mge_chillypunch_final4_fix2.bsp?raw=true" "mge_chillypunch_final4_fix2.bsp";
 fi
 
+ok "compiling sourcemod plugins"
 cd /home/container/tf/addons/sourcemod/scripting
 
 ./compile.sh
+
+cp -f /home/container/tf/addons/sourcemod/scripting/compiled/* \
+      /home/container/tf/addons/sourcemod/plugins/
 
 
 

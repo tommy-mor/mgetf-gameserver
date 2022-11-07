@@ -44,10 +44,10 @@
             "name": "Default Map",
             "description": "The default map to use when starting the server.",
             "env_variable": "SRCDS_MAP",
-            "default_value": "cp_dustbowl",
+            "default_value": "mge_chillypunch_final4_fix2",
             "user_viewable": true,
             "user_editable": true,
-            "rules": "required|regex:\/^(\\w{1,20})$\/"
+            "rules": "required"
         },
         {
             "name": "Steam",
