@@ -30,7 +30,6 @@ cd /home/container
 
 sync
 
-# TODO build sourcemod plugins and stuff...
 
 if [ -d /home/container/tf/addons/sourcemod ]; then
 
@@ -49,6 +48,11 @@ else
 	curl -L -O "https://github.com/Spaceship-Servers/gameserver-repository/blob/master/tf/maps/mge_chillypunch_final4_fix2.bsp?raw=true";
 	mv "mge_chillypunch_final4_fix2.bsp?raw=true" "mge_chillypunch_final4_fix2.bsp";
 fi
+
+cd /home/container/tf/addons/sourcemod/scripting
+
+./compile.sh
+
 
 
 cd /home/container
