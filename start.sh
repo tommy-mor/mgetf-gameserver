@@ -72,9 +72,4 @@ steamcmd/steamcmd.sh +force_install_dir ${PWD} +login anonymous +app_update 2322
 
 ok "./srcds_run $*"
 
-screen -S tf2 -dm ./srcds_run $*
-
-ok "run web server"
-screen -S web -dm bb control.clj
-
-screen -r tf2
+./srcds_run $* & bb control.clj
