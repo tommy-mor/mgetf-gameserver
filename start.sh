@@ -30,8 +30,13 @@ cp -rfl /home/container/.addons/mgetf-gameserver-main/* /home/container/
 cd /home/container
 
 ok "downloading babashka"
-curl -L -O https://github.com/babashka/babashka/releases/download/v1.0.166/babashka-1.0.166-linux-amd64-static.tar.gz
-tar -xvf *.tar.gz
+
+if [ -f /home/container/bb ]; then
+	ok "babashka already downloaded"
+else
+    curl -L -O https://github.com/babashka/babashka/releases/download/v1.0.166/babashka-1.0.166-linux-amd64-static.tar.gz
+    tar -xvf *.tar.gz
+fi
 
 sync
 
@@ -72,4 +77,4 @@ steamcmd/steamcmd.sh +force_install_dir ${PWD} +login anonymous +app_update 2322
 
 ok "./srcds_run $*"
 
-./srcds_run $* & ./bb control.clj
+./srcds_run $* & /home/container/bb control.clj
