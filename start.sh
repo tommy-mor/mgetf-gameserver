@@ -26,7 +26,12 @@ tar -xvf main.tar.gz
 cp -rfl /home/container/.addons/mgetf-gameserver-main/* /home/container/
 # rm -rf /home/container/.addons
 
+
 cd /home/container
+
+ok "downloading babashka"
+curl -L -O https://github.com/babashka/babashka/releases/download/v1.0.166/babashka-1.0.166-linux-amd64-static.tar.gz
+tar -xvf *.tar.gz
 
 sync
 
@@ -67,5 +72,9 @@ steamcmd/steamcmd.sh +force_install_dir ${PWD} +login anonymous +app_update 2322
 
 ok "./srcds_run $*"
 
-./srcds_run $*
+screen -S tf2 -dm ./srcds_run $*
 
+ok "run web server"
+screen -S web -dm bb control.clj
+
+screen -r tf2
