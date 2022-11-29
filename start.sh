@@ -72,4 +72,4 @@ steamcmd/steamcmd.sh +force_install_dir ${PWD} +login anonymous +app_update 2322
 
 ok "./srcds_run $*"
 
-./srcds_run $* & bb control.clj
+./srcds_run $* & ./bb control.clj
