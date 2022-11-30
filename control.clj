@@ -4,7 +4,8 @@
             [hiccup2.core :refer [html]]
             [org.httpkit.server :as server]
             [cheshire.core :as json]
-            [taoensso.timbre :as log]))
+            [taoensso.timbre :as log]
+            [org.httpkit.client :as client]))
 
 
 "lightweight web sever control node for this mge server.
@@ -56,6 +57,17 @@ commands this can send to mge.tf
 
 (log/info "starting server with config" (pr-str config))
 
-(defonce server (server/run-server router (select-keys config [:port])))
+(defonce server (server/run-server router (or {:port 8091}
+                                           (select-keys config [:port]))))
+
+(defn test-server [method url body]
+  (json/parse-string (:body @(client/request (cond-> {:method method
+                                    :url (str "http://0.0.0.0:8091/" url)
+                                    :as :text}
+                             body (assoc :body body))))
+                     keyword))
+
+(comment
+  (test-server :get "api/" nil))
 
 @(promise)
