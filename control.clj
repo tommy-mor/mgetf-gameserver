@@ -5,7 +5,20 @@
             [org.httpkit.server :as server]
             [cheshire.core :as json]
             [taoensso.timbre :as log]
-            [org.httpkit.client :as client]))
+            [org.httpkit.client :as client]
+
+            [babashka.pods :as pods]))
+
+(pods/load-pod 'org.babashka/go-sqlite3 "0.1.0")
+(require '[pod.babashka.go-sqlite3 :as sqlite])
+
+(def config (clojure.edn/read-string (slurp "config.edn")))
+
+(def db (or (:mge-db config) "tf/addons/sourcemod/data/sqlite/sourcemod-local.sq3"))
+
+(sqlite/query db ["select (name) from sqlite_schema"])
+
+(sqlite/query db ["select * from mgemod_stats"])
 
 
 "lightweight web sever control node for this mge server.
@@ -43,7 +56,7 @@ commands this can send to mge.tf
     (match [(:request-method req) paths]
            
            [:get ["api"]]
-           {:body (json/generate-string {:epic "win"})}
+           {:body (json/generate-string (sqlite/query db ["select (name) from sqlite_schema"]))}
            
            
            [:get ["users" id]]
@@ -52,8 +65,6 @@ commands this can send to mge.tf
            :else {:body (str (html [:html "Welcome!"]))})))
 
 
-
-(def config (clojure.edn/read-string (slurp "config.edn")))
 
 (log/info "starting server with config" (pr-str config))
 

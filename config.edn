@@ -1,2 +1,3 @@
 {:port 8090
- :homeserver-url "mge.tf"}
+ :homeserver-url "mge.tf"
+ :mge-db "tf/addons/sourcemod/data/sqlite/sourcemod-local.sq3"}

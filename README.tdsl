@@ -1,3 +1,12 @@
 this repo will merge into empty tf2 directory
 
 have the egg json in this repo as well, egg script just clones and merges, then runs install.sh in here
+
+
+maybe use https://github.com/ribasco/async-gamequery-lib somehow? with rcon access to server, could be good?
+
+or maybe one of the many impls here: https://developer.valvesoftware.com/wiki/Server_queries
+maybe make pod out of go one?
+
+maybe https://github.com/koraktor/steam-condenser-java
+https://github.com/kidoman/go-steam
