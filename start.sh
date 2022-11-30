@@ -80,4 +80,4 @@ steamcmd/steamcmd.sh +force_install_dir ${PWD} +login anonymous +app_update 2322
 ok "./srcds_run $*"
 
 # ./srcds_run $* & /home/container/bb control.clj
- ./srcds_run $* & /home/container/bb --nrepl-server 8090
+ ./srcds_run $* & /home/container/bb nrepl-server 0.0.0.0:8090
