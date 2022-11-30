@@ -15,10 +15,24 @@
 (def config (clojure.edn/read-string (slurp "config.edn")))
 
 (def db (or (:mge-db config) "tf/addons/sourcemod/data/sqlite/sourcemod-local.sq3"))
+(def homeserver-url (or (:homeserver-url config) "mge.tf"))
 
 (sqlite/query db ["select (name) from sqlite_schema"])
 
 (sqlite/query db ["select * from mgemod_stats"])
+
+{{{
+   need to do two things:
+     make babashka pod for the a2s/rcon go api.
+
+   integrate this with the mge.tf homeserver. be able to start tournaments from web ui (+ example tournaments, have query param for ["api" "players" "fake?=true"] that responds with fake data, so that i can test things full stack.)
+   handle the challonge madness from mge.tf...
+   
+
+   make sourcemod plugin apply the rules correctly...
+   
+   
+   }}}
 
 
 "lightweight web sever control node for this mge server.
