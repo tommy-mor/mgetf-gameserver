@@ -22,6 +22,7 @@ mkdir -p /home/container/.addons
 cd /home/container/.addons
 curl -L -O https://github.com/tommy-mor/mgetf-gameserver/archive/refs/heads/main.tar.gz
 tar -xvf main.tar.gz 
+rm main.tar.gz
 
 cp -rfl /home/container/.addons/mgetf-gameserver-main/* /home/container/
 # rm -rf /home/container/.addons
