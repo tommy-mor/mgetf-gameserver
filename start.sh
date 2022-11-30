@@ -37,6 +37,7 @@ if [ -f /home/container/bb ]; then
 else
     curl -L -O https://github.com/babashka/babashka/releases/download/v1.0.166/babashka-1.0.166-linux-amd64-static.tar.gz
     tar -xvf *.tar.gz
+	rm *.tar.gz
 fi
 
 sync
@@ -78,4 +79,5 @@ steamcmd/steamcmd.sh +force_install_dir ${PWD} +login anonymous +app_update 2322
 
 ok "./srcds_run $*"
 
-./srcds_run $* & /home/container/bb control.clj
+# ./srcds_run $* & /home/container/bb control.clj
+ ./srcds_run $* & /home/container/bb --nrepl-server 8090
