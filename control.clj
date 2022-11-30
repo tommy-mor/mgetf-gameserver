@@ -7,33 +7,36 @@
             [taoensso.timbre :as log]
             [org.httpkit.client :as client]
 
-            [babashka.pods :as pods]))
+            [babashka.pods :as pods]
+            [cognitect.transit :as transit])
+  (:import
+   [java.io ByteArrayInputStream ByteArrayOutputStream]))
 
 (pods/load-pod 'org.babashka/go-sqlite3 "0.1.0")
 (require '[pod.babashka.go-sqlite3 :as sqlite])
 
+(defn transit-str [inp]
+  (def out (ByteArrayOutputStream. 4096))
+  (def writer (transit/writer out :json))
+  
+  (transit/write writer inp)
+  (.toString out))
+
+(defn transit-read [str]
+  (def in (ByteArrayInputStream. (.getBytes str)))
+  (def reader (transit/reader in :json))
+  
+  (transit/read reader))
+
 (def config (clojure.edn/read-string (slurp "config.edn")))
 
-(def db (or (:mge-db config) "tf/addons/sourcemod/data/sqlite/sourcemod-local.sq3"))
-(def homeserver-url (or (:homeserver-url config) "mge.tf"))
+(def db (:mge-db config))
+(def homeserver-url (:homeserver-url config))
 
 (sqlite/query db ["select (name) from sqlite_schema"])
 
 (sqlite/query db ["select * from mgemod_stats"])
-
-{{{
-   need to do two things:
-     make babashka pod for the a2s/rcon go api.
-
-   integrate this with the mge.tf homeserver. be able to start tournaments from web ui (+ example tournaments, have query param for ["api" "players" "fake?=true"] that responds with fake data, so that i can test things full stack.)
-   handle the challonge madness from mge.tf...
-   
-
-   make sourcemod plugin apply the rules correctly...
-   
-   
-   }}}
-
+(sqlite/query db ["select * from players_in_server"])
 
 "lightweight web sever control node for this mge server.
   it listens for matches and commands from mge.tf, and implements them. (mostly through sqlite commands)
@@ -87,12 +90,19 @@ commands this can send to mge.tf
 
 (defn test-server [method url body]
   (json/parse-string (:body @(client/request (cond-> {:method method
-                                    :url (str "http://0.0.0.0:8091/" url)
-                                    :as :text}
+                                                      :url (str "http://0.0.0.0:8091/" url)
+                                                      :as :text}
                              body (assoc :body body))))
                      keyword))
+(defn query-homeserver [query]
+  (transit-read (:body @(client/request {:method :post
+                                         :url homeserver-url
+                                         :as :text
+                                         :headers {"content-type" "application/transit+json"}
+                                         :body (transit-str query) }))))
 
 (comment
-  (test-server :get "api/" nil))
+  (test-server :get "api/" nil)
+  (query-homeserver [{:notes [#:notes{:all [:note/id :note/text :note/modified :note/created]}]} :com.wsscode.pathom.core/errors]))
 
 @(promise)
