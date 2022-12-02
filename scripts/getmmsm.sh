@@ -3,7 +3,7 @@
 echo "running from git"
 
 
-mm_url="https://mms.alliedmods.net/mmsdrop/1.12/mmsource-1.11.0-git1148-linux.tar.gz"
+mm_url="https://mms.alliedmods.net/mmsdrop/1.11/mmsource-1.11.0-git1148-linux.tar.gz"
 sm_url="https://www.sourcemod.net/smdrop/1.12/sourcemod-1.12.0-git6906-linux.tar.gz"
 
 mm_dest="mm-1.11.1148.tgz"
