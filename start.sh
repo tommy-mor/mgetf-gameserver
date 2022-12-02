@@ -42,7 +42,7 @@ fi
 
 sync
 
-if [ -d /home/container/tf/addons/sourcemod/scripting/compile.sh ]; then
+if [ -d /home/container/tf/addons/metamod ]; then
 
 	ok "sm already installed"
 else
