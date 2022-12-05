@@ -1,0 +1,3 @@
+{:port 8090
+ :homeserver-url "http://localhost:3000/api"
+ :mge-db :none}

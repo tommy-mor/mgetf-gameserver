@@ -28,15 +28,18 @@
   
   (transit/read reader))
 
-(def config (clojure.edn/read-string (slurp "config.edn")))
+(def config (clojure.edn/read-string (slurp (case (System/getProperty "user.name")
+                                              "tommy" "config-dev.edn"
+                                              "config.edn"))))
 
 (def db (:mge-db config))
 (def homeserver-url (:homeserver-url config))
 
-(sqlite/query db ["select (name) from sqlite_schema"])
+(comment
+  (sqlite/query db ["select (name) from sqlite_schema"])
 
-(sqlite/query db ["select * from mgemod_stats"])
-(sqlite/query db ["select * from players_in_server"])
+  (sqlite/query db ["select * from mgemod_stats"])
+  (sqlite/query db ["select * from players_in_server"]))
 
 "lightweight web sever control node for this mge server.
   it listens for matches and commands from mge.tf, and implements them. (mostly through sqlite commands)
@@ -90,19 +93,28 @@ commands this can send to mge.tf
 
 (defn test-server [method url body]
   (json/parse-string (:body @(client/request (cond-> {:method method
-                                                      :url (str "http://0.0.0.0:8091/" url)
+                                                      :url (str "http://0.0.0.0:3000/" url)
                                                       :as :text}
                              body (assoc :body body))))
                      keyword))
+
 (defn query-homeserver [query]
-  (transit-read (:body @(client/request {:method :post
-                                         :url homeserver-url
-                                         :as :text
-                                         :headers {"content-type" "application/transit+json"}
-                                         :body (transit-str query) }))))
+  (let [resp @(client/request {:method :post
+                               :url homeserver-url
+                               :as :text
+                               :headers {"content-type" "application/transit+json"}
+                               :body (transit-str query) })]
+    (def t resp)
+    (println (:body t))
+    (transit-read (:body resp))))
 
 (comment
   (test-server :get "api/" nil)
-  (query-homeserver [{:notes [#:notes{:all [:note/id :note/text :note/modified :note/created]}]} :com.wsscode.pathom.core/errors]))
+  (query-homeserver '[(app.model.mge-servers/ping {:server/id 123})])
+  (query-homeserver '[{(app.model.session/login
+                       {:username "thmorriss@gmail.com", :password "arst"})
+                      [:session/valid? :account/name]}])
+  
+  t)
 
 @(promise)
