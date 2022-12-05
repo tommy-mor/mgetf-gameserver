@@ -1,3 +1,4 @@
 {:port 8090
  :homeserver-url "http://localhost:3000/api"
- :mge-db :none}
+ :mge-db :none
+ :registration #uuid "e42f262a-2506-4653-a6f4-789164f91b74"}

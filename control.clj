@@ -79,17 +79,13 @@ commands this can send to mge.tf
            {:body (json/generate-string (sqlite/query db ["select (name) from sqlite_schema"]))}
            
            
-           [:get ["users" id]]
-           {:body (str (html [:div id]))}
-           
            :else {:body (str (html [:html "Welcome!"]))})))
 
 
 
 (log/info "starting server with config" (pr-str config))
 
-(defonce server (server/run-server router (or {:port 8091}
-                                           (select-keys config [:port]))))
+(defonce server (server/run-server router (select-keys config [:port])))
 
 (defn test-server [method url body]
   (json/parse-string (:body @(client/request (cond-> {:method method
@@ -112,9 +108,11 @@ commands this can send to mge.tf
   (test-server :get "api/" nil)
   (query-homeserver '[(app.model.mge-servers/swag {:server/id 123})])
 
-  (def registration (query-homeserver '[(app.model.mge-servers/register {:server/remote-addr "127.0.0.1"})]))
+  (comment (def registration (query-homeserver `[(app.model.mge-servers/register {:server/game-addr "127.0.0.1:27015"
+                                                                                  :server/api-addr ~(str "http://127.0.0.1:" (:port config))})])))
   
-  (def id #uuid "a82082bc-d701-40e8-b8b9-bd00942a800b")
+  (def id (or (:server/id (first (vals registration)))
+              (:registration config)))
   
   (query-homeserver `[(app.model.mge-servers/ping {:server/id ~id})])
   (query-homeserver `[{(app.model.session/login
