@@ -110,10 +110,18 @@ commands this can send to mge.tf
 
 (comment
   (test-server :get "api/" nil)
-  (query-homeserver '[(app.model.mge-servers/ping {:server/id 123})])
-  (query-homeserver '[{(app.model.session/login
-                       {:username "thmorriss@gmail.com", :password "arst"})
-                      [:session/valid? :account/name]}])
+  (query-homeserver '[(app.model.mge-servers/swag {:server/id 123})])
+
+  (def registration (query-homeserver '[(app.model.mge-servers/register {:server/remote-addr "127.0.0.1"})]))
+  
+  (def id #uuid "a82082bc-d701-40e8-b8b9-bd00942a800b")
+  
+  (query-homeserver `[(app.model.mge-servers/ping {:server/id ~id})])
+  (query-homeserver `[{(app.model.session/login
+                        {:username "thmorriss@gmail.com", :password "arst"})
+                       [:session/valid? :account/name]}])
+
+  (query-homeserver `[{:servers/registered [:server/id :server/last-pinged]}])
   
   t)
 
