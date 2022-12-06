@@ -8,7 +8,9 @@
             [org.httpkit.client :as client]
 
             [babashka.pods :as pods]
-            [cognitect.transit :as transit])
+            [cognitect.transit :as transit]
+            [babashka.fs :as fs]
+            [clojure.walk])
   (:import
    [java.io ByteArrayInputStream ByteArrayOutputStream]))
 
@@ -28,12 +30,31 @@
   
   (transit/read reader))
 
-(def config (clojure.edn/read-string (slurp (case (System/getProperty "user.name")
-                                              "tommy" "config-dev.edn"
+(def config (clojure.edn/read-string (slurp (case (System/getenv "PROD")
+                                              nil "config-dev.edn"
                                               "config.edn"))))
+
+(defn map->nsmap
+  [m n]
+  (clojure.walk/postwalk (fn [x] (if (keyword? x)
+                                   (keyword n (name x))
+                                   x))
+                         m))
 
 (def db (:mge-db config))
 (def homeserver-url (:homeserver-url config))
+
+(if (and (:dev config) (fs/exists? db))
+  (fs/delete db))
+
+(when (empty? (sqlite/query db ["select (name) from sqlite_schema"]))
+  (sqlite/execute! db ["CREATE TABLE IF NOT EXISTS players_in_server (name TEXT, steamid TEXT)"])
+  (for [[name steamid] [["hallu" "halluid"]
+                        ["tommy" "tommyid"]
+                        ["kier" "kierid"]]]
+    (sqlite/execute! db
+                     ["insert into players_in_server (name, steamid) values (?, ?)"
+                      name steamid])))
 
 (comment
   (sqlite/query db ["select (name) from sqlite_schema"])
@@ -74,9 +95,14 @@ commands this can send to mge.tf
 (defn router [req]
   (let [paths (vec (rest (str/split (:uri req) #"/")))]
     (match [(:request-method req) paths]
-           
            [:get ["api"]]
-           {:body (json/generate-string (sqlite/query db ["select (name) from sqlite_schema"]))}
+           {:body (json/generate-string {:status "ok"}) } ;; TODO make this query game server
+           
+           [:get ["api" "players"]]
+           {:body (json/generate-string
+                   (map->nsmap
+                    (sqlite/query db ["select * from players_in_server"])
+                    "player"))}
            
            
            :else {:body (str (html [:html "Welcome!"]))})))
@@ -85,14 +111,18 @@ commands this can send to mge.tf
 
 (log/info "starting server with config" (pr-str config))
 
-(defonce server (server/run-server router (select-keys config [:port])))
+(def server (server/run-server router (select-keys config [:port])))
 
 (defn test-server [method url body]
-  (json/parse-string (:body @(client/request (cond-> {:method method
-                                                      :url (str "http://0.0.0.0:3000/" url)
-                                                      :as :text}
-                             body (assoc :body body))))
-                     keyword))
+  (let [req @(client/request (cond-> {:method method
+                                      :url (str "http://0.0.0.0:"
+                                                (:port config) "/"
+                                                url)
+                                      :as :text}
+                               body (assoc :body body)))]
+    (def t req)
+    (json/parse-string (:body req)
+                       keyword)))
 
 (defn query-homeserver [query]
   (let [resp @(client/request {:method :post
@@ -105,14 +135,11 @@ commands this can send to mge.tf
     (transit-read (:body resp))))
 
 (comment
-  (test-server :get "api/" nil)
-  (query-homeserver '[(app.model.mge-servers/swag {:server/id 123})])
-
+  (test-server :get "api/players" nil)
   (comment (def registration (query-homeserver `[(app.model.mge-servers/register {:server/game-addr "127.0.0.1:27015"
                                                                                   :server/api-addr ~(str "http://127.0.0.1:" (:port config))})])))
   
-  (def id (or (:server/id (first (vals registration)))
-              (:registration config)))
+  (def id (:registration config))
   
   (query-homeserver `[(app.model.mge-servers/ping {:server/id ~id})])
   (query-homeserver `[{(app.model.session/login
