@@ -44,22 +44,45 @@
 (def db (:mge-db config))
 (def homeserver-url (:homeserver-url config))
 
-(if (and (:dev config) (fs/exists? db))
-  (fs/delete db))
+(defn set-tournament [k v]
+  (sqlite/execute! db
+                   ["insert or replace into tournament (key, value) values (?, ?)" k v]))
+(defn get-tournament [k]
+  (:value (first (sqlite/query db
+                               ["select (value) from tournament where key = ?" k]))))
 
-(when (empty? (sqlite/query db ["select (name) from sqlite_schema"]))
-  (sqlite/execute! db ["CREATE TABLE IF NOT EXISTS players_in_server (name TEXT, steamid TEXT)"])
-  (for [[name steamid] [["hallu" "halluid"]
-                        ["tommy" "tommyid"]
-                        ["kier" "kierid"]]]
-    (sqlite/execute! db
-                     ["insert into players_in_server (name, steamid) values (?, ?)"
-                      name steamid])))
+(defn setup-db! []
+  (sqlite/execute! db
+                   ["CREATE TABLE IF NOT EXISTS matches (player1 TEXT, player2 TEXT)"])
+  
+  (sqlite/execute! db
+                   ["delete from matches where true"])
+  
+  (sqlite/execute! db
+                   ["CREATE TABLE IF NOT EXISTS players_in_server (name TEXT, steamid TEXT)"])
+  (sqlite/execute! db
+                   ["CREATE TABLE IF NOT EXISTS tournament (key TEXT PRIMARY KEY, value TEXT)"])
+  (sqlite/query db ["select (value) from tournament where key = 'status'"])
+  (sqlite/execute! db
+                   ["CREATE TABLE IF NOT EXISTS mgemod_duels (winner TEXT, loser TEXT, winnerscore INTEGER, loserscore INTEGER, winlimit INTEGER, gametime INTEGER, mapname TEXT, arenaname TEXT)"])
+  
+  #_(sqlite/execute! db ["delete from mgemod_duels where true"]))
+
+
+(when (and (:dev config) (fs/exists? db))
+  (fs/delete db)
+  (setup-db!)
+  (doall
+   (for [[name steamid] [["hallu" "halluid"]
+                         ["tommy" "tommyid"]
+                         ["kier" "kierid"]]]
+     (sqlite/execute! db
+                      ["insert into players_in_server (name, steamid) values (?, ?)"
+                       name steamid]))))
 
 (comment
   (sqlite/query db ["select (name) from sqlite_schema"])
 
-  (sqlite/query db ["select * from mgemod_stats"])
   (sqlite/query db ["select * from players_in_server"]))
 
 "lightweight web sever control node for this mge server.
@@ -92,17 +115,34 @@ post player_warning
 commands this can send to mge.tf
 ======= "
 
+(defn players-in-server []
+  (map->nsmap
+   (sqlite/query db ["select * from players_in_server"])
+   "player"))
+
 (defn router [req]
-  (let [paths (vec (rest (str/split (:uri req) #"/")))]
+  
+  (let [paths (vec (rest (str/split (:uri req) #"/")))
+        body (json/parse-string (when (:body req) (slurp (:body req))) keyword)]
     (match [(:request-method req) paths]
            [:get ["api"]]
-           {:body (json/generate-string {:status "ok"}) } ;; TODO make this query game server
+           {:body (do
+                    "TODO make this query the gameserver"
+                    (json/generate-string {:status "ok"})) }
+
+           [:get ["api" "current-tournament"]]
+           {:body
+            (json/generate-string {:tournament/id (get-tournament ":tournament/id")})}
+           
+           [:post ["api" "start-tournament"]]
+           {:body
+            (let [tid (:tournament/id body)]
+              (set-tournament ":tournament/id" tid)
+              (json/generate-string {:tournament/id tid
+                                     :tournament/participants (players-in-server)}))}
            
            [:get ["api" "players"]]
-           {:body (json/generate-string
-                   (map->nsmap
-                    (sqlite/query db ["select * from players_in_server"])
-                    "player"))}
+           {:body (json/generate-string (players-in-server))}
            
            
            :else {:body (str (html [:html "Welcome!"]))})))
@@ -130,12 +170,13 @@ commands this can send to mge.tf
                                :as :text
                                :headers {"content-type" "application/transit+json"}
                                :body (transit-str query) })]
-    (def t resp)
-    (println (:body t))
     (transit-read (:body resp))))
 
 (comment
+  
   (test-server :get "api/players" nil)
+  (test-server :get "api/current-tournament" nil)
+  (test-server :post "api/start-tournament" (json/generate-string {:tournament/id "1234"}))
   (comment (def registration (query-homeserver `[(app.model.mge-servers/register {:server/game-addr "127.0.0.1:27015"
                                                                                   :server/api-addr ~(str "http://127.0.0.1:" (:port config))})])))
   
