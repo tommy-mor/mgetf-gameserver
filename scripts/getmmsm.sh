@@ -64,8 +64,8 @@ cd ..
 
 ls -al 
 
-cp -rf "$destfolder/addons/*" /home/container/tf/addons/
-cp -rf "$destfolder/cfg/sourcemod" /home/container/tf/cfg/sourcemod
+cp -rf "$destfolder/addons/" /home/container/tf/
+cp -rf "$destfolder/cfg/sourcemod" /home/container/tf/cfg
 
 cd ..
 

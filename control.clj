@@ -83,7 +83,12 @@
 (comment
   (sqlite/query db ["select (name) from sqlite_schema"])
 
-  (sqlite/query db ["select * from players_in_server"]))
+  (sqlite/query db ["select * from players_in_server"])
+  (sqlite/execute! db
+                   ["insert into players_in_server (name, steamid) values (?, ?)"
+                    "epic guy" "pog"])
+  (sqlite/execute! db
+                   ["delete from players_in_server where true"]))
 
 "lightweight web sever control node for this mge server.
   it listens for matches and commands from mge.tf, and implements them. (mostly through sqlite commands)
@@ -136,18 +141,24 @@ commands this can send to mge.tf
            
            [:post ["api" "start-tournament"]]
            {:body
-            (let [tid (:tournament/id body)]
+            (let [tid (:tournament/id body)
+                  players (players-in-server)]
               (set-tournament ":tournament/id" tid)
+              (log/info "starting tournament " tid " with players " players)
               (json/generate-string {:tournament/id tid
-                                     :tournament/participants (players-in-server)}))}
+                                     :tournament/participants players}))}
+           
+           [:post ["api" "stop-tournament"]]
+           {:body
+            (let []
+              (set-tournament ":tournament/id" nil)
+              (json/generate-string {:tournament/id nil}))}
            
            [:get ["api" "players"]]
            {:body (json/generate-string (players-in-server))}
            
            
            :else {:body (str (html [:html "Welcome!"]))})))
-
-
 
 (log/info "starting server with config" (pr-str config))
 
